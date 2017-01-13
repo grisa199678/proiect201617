@@ -1,0 +1,11 @@
+﻿  MainGame.cpp
+c:\users\grishanyyaaa\documents\visual studio 2015\projects\dots\dots\maingame.cpp(80): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+c:\users\grishanyyaaa\documents\visual studio 2015\projects\dots\dots\maingame.cpp(115): warning C4244: 'argument': conversion from 'float' to 'Sint16', possible loss of data
+c:\users\grishanyyaaa\documents\visual studio 2015\projects\dots\dots\maingame.cpp(125): warning C4244: 'argument': conversion from 'float' to 'Sint16', possible loss of data
+c:\users\grishanyyaaa\documents\visual studio 2015\projects\dots\dots\maingame.cpp(146): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+c:\users\grishanyyaaa\documents\visual studio 2015\projects\dots\dots\maingame.cpp(153): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+c:\users\grishanyyaaa\documents\visual studio 2015\projects\dots\dots\maingame.cpp(154): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+c:\users\grishanyyaaa\documents\visual studio 2015\projects\dots\dots\maingame.cpp(155): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+c:\users\grishanyyaaa\documents\visual studio 2015\projects\dots\dots\maingame.cpp(171): warning C4244: 'argument': conversion from 'double' to 'Uint32', possible loss of data
+  Dots.vcxproj -> C:\Users\Grishanyyaaa\documents\visual studio 2015\Projects\Dots\Debug\Dots.exe
+  Dots.vcxproj -> C:\Users\Grishanyyaaa\documents\visual studio 2015\Projects\Dots\Debug\Dots.pdb (Partial PDB)
