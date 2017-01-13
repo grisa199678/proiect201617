@@ -1,11 +1,15 @@
 #include "MainGame.h"
 #include <fstream>
+#include <iostream>
 #include <math.h>
 #include <time.h> 
+#include <string>
 #include <stdlib.h>
 using namespace std;
 MainGame::MainGame()
 {
+	_best = 0;
+	_score = 0;
 	_complexity = 0;
 	_dotsList = new MainGame::Dot;
 	_dotsList->x = 0;
@@ -52,6 +56,7 @@ MainGame::MainGame()
 	_redColor = { 255, 0, 0, 255 };
 	_blackColor = { 0, 0, 0, 255 };
 	_whiteColor = { 255, 255, 255, 255 };
+
 }
 void MainGame::setCircleColor() {
 	SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 255);
@@ -73,6 +78,7 @@ void MainGame::initSystem() {
 	SDL_UpdateWindowSurface(_window);
 	SDL_RenderClear(_renderer);
 	SDL_RenderPresent(_renderer); 
+	srand(time(0));
 }
 
 void MainGame::processInput() {
@@ -90,15 +96,16 @@ void MainGame::processInput() {
 				if (event.key.keysym.sym == SDLK_SPACE) {
 					_keyPressed = 1;
 					_key = true;
-					if (_gameState == GameState::TRYAGAIN) _gameState = GameState::PLAY; else _gameState = GameState::TRYAGAIN;
-					if (_complexity<12) _complexity += 0.3;
+					if (_gameState == GameState::TRYAGAIN) _gameState = GameState::PLAY; else {
+						if (_complexity < 12) _complexity += 0.3;
+						checkDots();
+					}
 				}
 			}
 			if (event.type == SDL_KEYUP && event.key.keysym.sym == SDLK_SPACE) _key = false;
 				
 	}
 }
-
 void MainGame::drawDots() {
 	MainGame::Dot* prim;
 	prim = _dotsList->next;
@@ -107,8 +114,25 @@ void MainGame::drawDots() {
 		prim = prim->next;
 	}
 }
+void MainGame::checkDots() {
+	MainGame::Dot* prim;
+	prim = _dotsList->next;
+	int dots = 0;
+	while (prim != nullptr) {
+		if (abs(prim->r - _circleRadius-2) < 5) {
+		filledCircleRGBA(_renderer, prim->x, prim->y, 5, _defaultColor.r, _defaultColor.g, _defaultColor.b, _defaultColor.a);
+		prim->r = 0;
+		prim->x = -10;
+		prim->y = -10;
+		cout << abs(prim->r - _circleRadius) << "-------" << _circleRadius << endl;
+		dots++;
+	}
+		prim = prim->next;
+	}
+	_score = _score + dots;
+	if (dots == 0) _gameState = GameState::TRYAGAIN;
+}
 int MainGame::random(int k) {
-	srand(time(NULL));
 	return (rand() % k);
 }
 void MainGame::newDot() {
@@ -128,10 +152,11 @@ void MainGame::newDot() {
 		newD->r = r * 12;
 		newD->x = _circleX + x;
 		newD->y = _circleY + y;
+		cout << newD->r << " " << newD->x << " " << newD->y << endl;
 		newD->next = nullptr;
 		_dotsListLast->next = newD;
 		_dotsListLast = newD;
-		_dotAppear = random(4) * 50;
+		_dotAppear = 200;
 	}
 	else _dotAppear--;
 }
@@ -150,8 +175,25 @@ void MainGame::updateWindow() {
 }
 void MainGame::updateCurrentScore() {
 	TTF_Init();
+	char score[10];
+	for (int i = 0; i < 10; i++) score[i] = NULL;
+	score[0] = 'S';score[1] = 'C';score[2] = 'O';score[3] = 'R';score[4] = 'E';
+	score[5] = ':';  
+	if (_score < 10) score[6] = _score + 48; else 
+	if (_score < 100) {
+		score[7] = _score % 10 + 48;
+		score[6] = _score / 10 % 10 + 48;
+	} else {
+		int k = _score, m = 0;
+
+		while (k > 0) {
+			score[8 - m] = k % 10 + 48;
+			m++;
+			k = k / 10;
+		}
+		}
 	TTF_Font *Sans = TTF_OpenFont("sans.ttf", 24);
-	SDL_Surface* surfaceMessage = TTF_RenderText_Solid(Sans, "SCORE: ", _blackColor);
+	SDL_Surface* surfaceMessage = TTF_RenderText_Solid(Sans, score, _blackColor);
 	SDL_Texture* Message = SDL_CreateTextureFromSurface(_renderer, surfaceMessage);
 	SDL_QueryTexture(Message, NULL, NULL, &_currentScore.w, &_currentScore.h);
 	SDL_RenderCopy(_renderer, Message, NULL, &_currentScore);
@@ -163,16 +205,50 @@ void MainGame::tryAgain() {
 	SDL_Surface* surfaceMessage = TTF_RenderText_Solid(Sans, "TRY AGAIN!", _blackColor);
 	SDL_Texture* Message = SDL_CreateTextureFromSurface(_renderer, surfaceMessage);
 	SDL_Rect again;
+	_score = 0;
 	again.x = 80;
 	again.y = 200;
 	SDL_QueryTexture(Message, NULL, NULL, &again.w, &again.h);
 	SDL_RenderCopy(_renderer, Message, NULL, &again);
 	TTF_Quit();
+	MainGame::Dot*prim;
+	prim = _dotsList;
+	prim->next->next = nullptr;
+	_dotAppear = 0;
+	_circleRadius = _maxRadius;
+	_increase = false;
 }
 void MainGame::updateBestScore() {
 	TTF_Init();
+	ifstream fin("bestscore.ini");
+	fin >> _best;
+	fin.close();
+	if (_score > _best) {
+		ofstream fout;
+		fout.open("bestscore.ini");
+		_best = _score;
+		fout << _score;
+		fout.close();
+	}
+	char score[10];
+	for (int i = 0; i < 10; i++) score[i] = NULL;
+	score[0] = 'B';score[1] = 'E';score[2] = 'S';score[3] = 'T';score[4] = ':';
+	if (_best < 10) score[5] = _best + 48; else
+		if (_best < 100) {
+			score[6] = _best % 10 + 48;
+			score[5] = _best / 10 % 10 + 48;
+		}
+		else {
+			int k = _best, m = 0;
+
+			while (k > 0) {
+				score[7 - m] = k % 10 + 48;
+				m++;
+				k = k / 10;
+			}
+		}
 	TTF_Font *Sans = TTF_OpenFont("sans.ttf", 24);
-	SDL_Surface* surfaceMessage = TTF_RenderText_Solid(Sans, "BEST: ", _blackColor);
+	SDL_Surface* surfaceMessage = TTF_RenderText_Solid(Sans, score, _blackColor);
 	SDL_Texture* Message = SDL_CreateTextureFromSurface(_renderer, surfaceMessage);
 	SDL_QueryTexture(Message, NULL, NULL, &_bestArea.w, &_bestArea.h);
 	SDL_RenderCopy(_renderer, Message, NULL, &_bestArea);

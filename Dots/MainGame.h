@@ -24,6 +24,8 @@ private:
 	bool _key;
 	int _keyPressed;
 	int _dotAppear;
+	int _score;
+	int _best;
 	int _circleRadius;
 	int _screenWidth;
 	int _screenHeight;
@@ -50,6 +52,7 @@ private:
 	void updateCurrentScore();
 	void updateBestScore();
 	void tryAgain();
+	void checkDots();
 	int random(int k);
 };
 
